@@ -1,41 +1,132 @@
-A backend project developed to explore core banking operations using Java and Spring Boot. The project focuses on basic banking processes such as customer management, account creation, balance management, and money transfers.
+# Core Banking System
+
+A backend project developed with Java 21 and Spring Boot to simulate core banking operations through RESTful APIs.
 
 ## Features
 
-- **Customer Management:** Create, search, list, update, and delete customer records. Customers are identified by their TCKN.
-- **Account Management:** Create bank accounts linked to customers, generate unique IBANs, and manage account balances in TRY, USD, and EUR.
-- **Money Transfers:** Transfer money between accounts using IBANs. The system checks account existence, currency compatibility, and available balance before processing a transfer. HTTP transfer idempotency is scoped to the authenticated identity, operation, and key.
-- **Transaction History:** Store transfer details, including sender, receiver, amount, currency, and transaction timestamp.
-- **REST API:** Expose banking operations through RESTful endpoints.
-- **Authentication and Authorization:** Provisioned identities, BCrypt passwords, 15-minute stateless JWT access tokens, CUSTOMER/BANK_OPERATOR/AUDITOR/ADMIN roles, and customer/account ownership checks.
+- **Customer Management:** Create, update, search, and manage customer records.
+- **Account Management:** Create customer accounts, generate unique IBANs, and manage balances in TRY, USD, and EUR.
+- **Money Transfers:** Transfer funds between accounts with balance and currency validation.
+- **Transaction History:** Track completed transfers and transaction details.
+- **Authentication & Authorization:** JWT-based authentication with role-based access control.
+- **Ownership Validation:** Restrict customers to their own accounts and operations.
+- **Idempotent Transfers:** Prevent duplicate transfer processing through idempotency keys.
 
 ## Technologies
 
 - Java 21
 - Spring Boot
-- Spring Web MVC
-- Spring Data JPA
 - Spring Security
-- Hibernate
+- Spring Data JPA & Hibernate
 - PostgreSQL
+- Flyway
 - Maven
 - Jakarta Bean Validation
 - Springdoc OpenAPI
 
 ## Architecture
 
-The project follows a layered structure with separate controllers, services, repositories, DTOs, and entities.
+The project follows a layered architecture:
 
-It uses Spring Data JPA for database operations and transaction management. Flyway migrations manage the database schema. Spring Security validates bearer JWTs on protected requests and reloads current identity status and roles from the database.
+- **Controller:** Handles HTTP requests and responses.
+- **Service:** Contains business logic.
+- **Repository:** Manages database operations.
+- **Entity:** Represents database models.
+- **DTO:** Handles API request and response objects.
 
-## Authentication configuration
+Flyway is used to manage database schema migrations, while Spring Security handles authentication and authorization.
 
-Set `JWT_SECRET` to a unique random secret of at least 32 UTF-8 bytes and set `DB_PASSWORD` before starting the application. The application intentionally fails during startup when `JWT_SECRET` is missing or too short; the database password has no insecure YAML fallback. Define variables in the shell, IDE run configuration, or container environment (`.env.example` is only a template and is not auto-loaded by Spring Boot). Do not commit real signing secrets or database passwords. `JWT_ISSUER` defaults to `corebanking-prod`; `JWT_EXPIRATION_MS` defaults to `900000` (15 minutes).
+## Configuration
 
-Only `POST /api/auth/login` is public by default. An `ADMIN` identity provisions users through `POST /api/auth/users`; public self-registration is not supported. A `CUSTOMER` identity must be linked to one existing customer record, while staff identities must not have a customer link.
+The application requires the following environment variables:
 
-For a new database, no default administrator is seeded. To create the first `ADMIN`, temporarily set `ADMIN_BOOTSTRAP_ENABLED=true`, `ADMIN_BOOTSTRAP_USERNAME`, and `ADMIN_BOOTSTRAP_PASSWORD` in one application instance. The startup runner creates the administrator only when no `ADMIN` identity exists; it uses the same BCrypt provisioning service. Use a password of at least 12 characters and no more than 72 UTF-8 bytes. After the first administrator is created, remove all three bootstrap variables and restart the application. Do not leave bootstrap enabled in a multi-instance deployment; use a single instance for this one-time operation. The feature never creates a default username or password.
+| Variable | Description |
+|---|---|
+| `DB_URL` | PostgreSQL connection URL |
+| `DB_USERNAME` | Database username |
+| `DB_PASSWORD` | Database password |
+| `JWT_SECRET` | JWT signing secret (minimum 32 UTF-8 bytes) |
 
-Send the returned token as `Authorization: Bearer <accessToken>` to protected APIs. `OPENAPI_ENABLED` controls whether the Swagger/OpenAPI endpoints are enabled; `OPENAPI_PUBLIC` separately controls anonymous access (both default to `false`). Login throttling defaults to 10 failed attempts per client IP in 15 minutes. The in-process limiter is a fallback; clustered deployments also require a gateway/shared rate limiter.
+Optional variables:
 
-Payment idempotency keys are isolated per authenticated identity; historical pre-authentication records use the reserved internal `principal_id=0` scope and cannot satisfy an authenticated user request. This release does not implement refresh tokens, logout, token blacklisting, public sign-up, or persistent authentication audit storage. Authentication events are published for integration with the SPEC-015 audit implementation.
+| Variable | Default |
+|---|---|
+| `JWT_ISSUER` | `corebanking-prod` |
+| `JWT_EXPIRATION_MS` | `900000` |
+| `BANK_CODE` | `00000` |
+| `OPENAPI_ENABLED` | `false` |
+| `OPENAPI_PUBLIC` | `false` |
+| `LOGIN_MAX_ATTEMPTS` | `10` |
+| `LOGIN_WINDOW_SECONDS` | `900` |
+
+Set these variables in your environment or IDE run configuration. The application does not automatically load `.env` files.
+
+## Authentication
+
+- JWT access tokens are valid for 15 minutes by default.
+- Supported roles: `CUSTOMER`, `BANK_OPERATOR`, `AUDITOR`, and `ADMIN`.
+- Only `POST /api/auth/login` is publicly accessible by default.
+- User provisioning is restricted to administrators.
+- Public self-registration is not supported.
+- Passwords are stored using BCrypt.
+
+Include the access token in protected requests:
+
+```http
+Authorization: Bearer <accessToken>
+```
+
+### Initial Administrator
+
+No default administrator account is created.
+
+To provision the first administrator, temporarily configure:
+
+```properties
+ADMIN_BOOTSTRAP_ENABLED=true
+ADMIN_BOOTSTRAP_USERNAME=admin
+ADMIN_BOOTSTRAP_PASSWORD=your-secure-password
+```
+
+After the administrator is created, remove these variables and restart the application.
+
+Use this process on a single application instance only.
+
+## Running the Application
+
+Build the project:
+
+```bash
+./mvnw clean package
+```
+
+Run the application:
+
+```bash
+./mvnw spring-boot:run
+```
+
+The application runs on port `8081` by default.
+
+## API Documentation
+
+OpenAPI and Swagger UI can be enabled using:
+
+```properties
+OPENAPI_ENABLED=true
+OPENAPI_PUBLIC=true
+```
+
+`OPENAPI_ENABLED` controls endpoint availability, while `OPENAPI_PUBLIC` controls anonymous access.
+
+## Security Notes
+
+- Never commit database passwords or JWT signing secrets.
+- Use a strong JWT secret of at least 32 UTF-8 bytes.
+- Login attempts are rate-limited.
+- Production deployments with multiple instances require a shared rate-limiting solution.
+- Refresh tokens, token blacklisting, public registration, and persistent authentication audit storage are not implemented in this release.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
