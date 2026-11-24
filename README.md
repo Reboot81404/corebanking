@@ -85,7 +85,7 @@ To provision the first administrator, temporarily configure:
 ```properties
 ADMIN_BOOTSTRAP_ENABLED=true
 ADMIN_BOOTSTRAP_USERNAME=admin
-ADMIN_BOOTSTRAP_PASSWORD=your-secure-password
+ADMIN_BOOTSTRAP_PASSWORD=password
 ```
 
 After the administrator is created, remove these variables and restart the application.
