@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 public class AuthenticationServiceImpl implements AuthenticationService {
 
     private static final Pattern USERNAME_PATTERN = Pattern.compile("[A-Za-z0-9._-]{3,50}");
-    private static final int MIN_PASSWORD_LENGTH = 12;
+    private static final int MIN_PASSWORD_LENGTH = 4;
     private static final int MAX_BCRYPT_PASSWORD_BYTES = 72;
 
     private final UserIdentityRepository userIdentityRepository;
@@ -152,7 +152,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private void validateProvisioningPassword(String rawPassword) {
         if (rawPassword == null || rawPassword.length() < MIN_PASSWORD_LENGTH
                 || rawPassword.getBytes(StandardCharsets.UTF_8).length > MAX_BCRYPT_PASSWORD_BYTES) {
-            throw new BusinessException("Password must be at least 12 characters and at most 72 UTF-8 bytes.");
+            throw new BusinessException("Password must be at least 4 characters and at most 72 UTF-8 bytes.");
         }
     }
 
