@@ -1,0 +1,39 @@
+spring:
+  http:
+    converters:
+      preferred-json-mapper: jackson2
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+  flyway:
+    enabled: false
+
+jwt:
+  secret: test-only-signing-secret-with-at-least-256-bits-for-corebanking
+  issuer: corebanking-prod
+  expiration-ms: 900000
+
+security:
+  bootstrap-admin:
+    # Unit/integration tests must never inherit a deployment bootstrap switch.
+    enabled: false
+    username: ''
+    password: ''
+  public-docs:
+    enabled: false
+  login:
+    max-attempts: 10
+    window-seconds: 900
+    max-tracked-clients: 10000
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

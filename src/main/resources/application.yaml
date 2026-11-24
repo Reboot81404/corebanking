@@ -1,0 +1,58 @@
+spring:
+  http:
+    converters:
+      preferred-json-mapper: jackson2
+  application:
+    name: corebanking-prod
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 1
+    locations: classpath:db/migration
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+  data:
+    web:
+      pageable:
+        max-page-size: 100
+
+banking:
+  iban:
+    bank-code: ${BANK_CODE:00000}
+
+jwt:
+  # No development or production fallback: startup fails when JWT_SECRET is absent or too short.
+  secret: ${JWT_SECRET:}
+  issuer: ${JWT_ISSUER:corebanking-prod}
+  expiration-ms: ${JWT_EXPIRATION_MS:900000}
+
+security:
+  bootstrap-admin:
+    enabled: ${ADMIN_BOOTSTRAP_ENABLED:false}
+    username: ${ADMIN_BOOTSTRAP_USERNAME:}
+    password: ${ADMIN_BOOTSTRAP_PASSWORD:}
+  public-docs:
+    enabled: ${OPENAPI_PUBLIC:false}
+  login:
+    max-attempts: ${LOGIN_MAX_ATTEMPTS:10}
+    window-seconds: ${LOGIN_WINDOW_SECONDS:900}
+    max-tracked-clients: ${LOGIN_MAX_TRACKED_CLIENTS:10000}
+
+springdoc:
+  api-docs:
+    enabled: ${OPENAPI_ENABLED:false}
+  swagger-ui:
+    enabled: ${OPENAPI_ENABLED:false}
+
+server:
+  port: 8081
