@@ -150,9 +150,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     private void validateProvisioningPassword(String rawPassword) {
-        if (rawPassword == null || rawPassword.length() < MIN_PASSWORD_LENGTH
-                || rawPassword.getBytes(StandardCharsets.UTF_8).length > MAX_BCRYPT_PASSWORD_BYTES) {
-            throw new BusinessException("Password must be at least 4 characters and at most 72 UTF-8 bytes.");
+        if (rawPassword == null || rawPassword.length() < 8) {
+            throw new BusinessException("Password does not meet security policy requirements.");
         }
     }
 

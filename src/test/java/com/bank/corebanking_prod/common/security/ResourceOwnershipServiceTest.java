@@ -59,7 +59,7 @@ class ResourceOwnershipServiceTest {
         assertTrue(resourceOwnershipService.canAccessCustomer(10L));
         authenticateAs(UserRole.AUDITOR, null);
         assertTrue(resourceOwnershipService.canAccessCustomer(20L));
-        verify(eventPublisher).publishEvent(argThat(event ->
+        verify(eventPublisher).publishEvent(argThat((Object event) ->
                 event instanceof AuthorizationAuditEvent auditEvent
                         && auditEvent.actorIdentityId().equals(1L)
                         && auditEvent.action().equals("READ_CUSTOMER")
@@ -102,11 +102,11 @@ class ResourceOwnershipServiceTest {
         assertTrue(resourceOwnershipService.canAccessCustomerByTckn("10000000146"));
         assertTrue(resourceOwnershipService.canAccessAccountByIban("TR000000000000000000000001"));
 
-        verify(eventPublisher).publishEvent(argThat(event ->
+        verify(eventPublisher).publishEvent(argThat((Object event) ->
                 event instanceof AuthorizationAuditEvent auditEvent
                         && auditEvent.action().equals("READ_CUSTOMER_BY_TCKN")
                         && auditEvent.resourceId().equals(10L)));
-        verify(eventPublisher).publishEvent(argThat(event ->
+        verify(eventPublisher).publishEvent(argThat((Object event) ->
                 event instanceof AuthorizationAuditEvent auditEvent
                         && auditEvent.action().equals("READ_ACCOUNT_BY_IBAN")
                         && auditEvent.resourceId().equals(100L)));
@@ -117,7 +117,7 @@ class ResourceOwnershipServiceTest {
     void shouldAuditAuditorCustomerAccountList() {
         authenticateAs(UserRole.AUDITOR, null);
         assertTrue(resourceOwnershipService.canListAccountsForCustomer(20L));
-        verify(eventPublisher).publishEvent(argThat(event ->
+        verify(eventPublisher).publishEvent(argThat((Object event) ->
                 event instanceof AuthorizationAuditEvent auditEvent
                         && auditEvent.action().equals("LIST_CUSTOMER_ACCOUNTS")
                         && auditEvent.resourceType().equals("CUSTOMER")
@@ -133,7 +133,7 @@ class ResourceOwnershipServiceTest {
     void shouldAuditAuditorCustomerList() {
         authenticateAs(UserRole.AUDITOR, null);
         assertTrue(resourceOwnershipService.canListCustomers());
-        verify(eventPublisher).publishEvent(argThat(event ->
+        verify(eventPublisher).publishEvent(argThat((Object event) ->
                 event instanceof AuthorizationAuditEvent auditEvent
                         && auditEvent.action().equals("LIST_CUSTOMERS")
                         && auditEvent.resourceType().equals("CUSTOMER")

@@ -83,7 +83,7 @@ class AuthenticationServiceTest {
         verify(authenticationManager).authenticate(argThat(authentication ->
                 "john_doe".equals(authentication.getPrincipal())
                         && "Password123!".equals(authentication.getCredentials())));
-        verify(eventPublisher).publishEvent(argThat(event ->
+        verify(eventPublisher).publishEvent(argThat((Object event) ->
                 event instanceof AuthenticationAuditEvent auditEvent
                         && auditEvent.outcome() == AuthenticationAuditEvent.Outcome.SUCCESS
                         && Long.valueOf(7L).equals(auditEvent.actorIdentityId())));
@@ -98,7 +98,7 @@ class AuthenticationServiceTest {
                 () -> authenticationService.login(new LoginRequest("unknown_user", "Password123!")));
 
         assertEquals("Invalid username or password.", exception.getMessage());
-        verify(eventPublisher).publishEvent(argThat(event ->
+        verify(eventPublisher).publishEvent(argThat((Object event) ->
                 event instanceof AuthenticationAuditEvent auditEvent
                         && auditEvent.outcome() == AuthenticationAuditEvent.Outcome.FAILURE
                         && auditEvent.actorIdentityId() == null));
